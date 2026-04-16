@@ -1,0 +1,11 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: noted-ai
+    env_file: .env
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true # stdin_open and tty lets the CLI input work
