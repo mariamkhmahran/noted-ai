@@ -102,6 +102,8 @@ class NotedDB():
             
             self.connection.commit()
 
+            return results
+
     def update(self, note_id, title, body, tags):
         try:
             self.cursor.execute(

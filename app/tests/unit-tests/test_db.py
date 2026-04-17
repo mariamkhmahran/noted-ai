@@ -41,3 +41,29 @@ def test_db___delete_note(db):
     result = db.search("SELECT * FROM Notes", ())
 
     assert len(result) == 0
+
+def test_db___create_note_missing_body_error(db):
+    """Verifies that the database catches NULL constraints on the body field."""
+
+    result = db.create("Title Only", None, ["tag"])
+    
+    assert isinstance(result, dict)
+    assert result["status"] == "ERROR"
+    assert "Failed to create Note" in result["content"]
+
+def test_db___update_non_existent_note_error(db):
+    """Verifies that updating a non-existent ID raises the expected custom exception."""
+
+    result = db.update(999, "New Title", "New Body", ["tag"])
+    
+    assert isinstance(result, dict)
+    assert result["status"] == "ERROR"
+    assert "Note not found" in result["content"]
+
+def test_db___delete_invalid_type_id(db):
+    """Verifies the delete method handles incorrect ID types without crashing the loop."""
+    # Passing a string that doesn't exist to verify the "not found" logic
+    results = db.delete(["invalid_id_format"])
+    print(results)
+    
+    assert "Note invalid_id_format not found" in results[0]
