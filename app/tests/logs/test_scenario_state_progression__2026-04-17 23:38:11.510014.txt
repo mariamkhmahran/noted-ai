@@ -1,0 +1,52 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> Add a note: 'Project A' with body 'Starts Monday'. Also add a note: 'Team Lunch' body 'Friday at 1pm'.
+
+>> Done — I added both notes:
+
+- Project A — “Starts Monday”
+- Team Lunch — “Friday at 1pm”
+
+> How many notes do I have now?
+
+>> You have 4 notes now.
+
+> Update the Team Lunch note to say 'Friday at 2pm'.
+
+>> I found the note **Team Lunch**. Before I update it, please confirm:
+
+Update note ID 3 from:
+- **Friday at 1pm**
+
+to:
+- **Friday at 2pm**
+
+> I confirm the update
+
+>> Done — I updated **Team Lunch** to: **Friday at 2pm**.
+
+> Actually, make it Tuesday instead of Friday.
+
+>> Sure — I can do that, but I need your confirmation first since this is an update.
+
+Do you want me to change the **Team Lunch** note from **“Friday at 2pm”** to **“Tuesday at 2pm”**?
+
+> I confirm the update
+
+>> Updated — **Team Lunch** now says **Tuesday at 2pm**.
+
+> Delete the Project A note.
+
+>> I found **Project A**. Before I delete it, please confirm:
+
+Delete note ID 4 titled **Project A**?
+
+> Yes, confirm deletion.
+
+>> Deleted — **Project A** has been removed.
+
+> How many notes do I have left?
+
+>> You have 3 notes left.

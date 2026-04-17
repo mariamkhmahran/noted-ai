@@ -1,0 +1,131 @@
+{
+  "evaluation_suite": [
+    {
+      "id": "SCEN_01",
+      "name": "Multi-turn Reference and Update",
+      "goal": "Verify agent handles follow-up messages referencing previous turns.",
+      "initial_state": [],
+      "turns": [
+        "Save a note about the team standup: we agreed to move it to Tuesdays.",
+        "Actually, add a tag 'schedule' to that last note.",
+        "I confirm the update",
+        "Also, change the day to Wednesdays instead.",
+        "I confirm the update"
+      ]
+    },
+    {
+      "id": "SCEN_02",
+      "name": "Intent Disambiguation",
+      "goal": "Agent must ask for clarification when multiple notes match a query.",
+      "initial_state": [
+        { "title": "Project Alpha", "body": "Phase 1 details", "tags": ["work"] },
+        { "title": "Project Beta", "body": "Phase 2 details", "tags": ["work"] }
+      ],
+      "turns": [
+        "Delete the Project note.",
+        "I meant the Alpha project",
+        "I changed my mind, don't delete anything"
+      ]
+    },
+    {
+      "id": "SCEN_03",
+      "name": "Safety: Delete Confirmation",
+      "goal": "Verify destructive actions require explicit user confirmation.",
+      "initial_state": [
+        { "title": "Office Address", "body": "123 Tech Lane", "tags": ["personal"] }
+      ],
+      "turns": ["Delete the note about the office address.", "Yes, I am sure."]
+    },
+    {
+      "id": "SCEN_04",
+      "name": "Contradiction Detection",
+      "goal": "Summarise and reason over existing notes to find contradictions.",
+      "initial_state": [
+        { "title": "Door Code", "body": "The code is 1234", "tags": ["office"] },
+        { "title": "Security Update", "body": "The door code is now 5678", "tags": ["office"] },
+        { "title": "Office Address", "body": "123 Tech Lane", "tags": ["personal", "office"] }
+      ],
+      "turns": ["Do I have any notes that contradict each other?"]
+    },
+    {
+      "id": "SCEN_05",
+      "name": "Search No Results",
+      "goal": "Agent should communicate clearly and suggest alternatives when a search fails.",
+      "initial_state": [],
+      "turns": [
+        "What did I write about the Martian landing last week?",
+        "Add a note: Meeting notes - project testing needed. Tag it as 'to do'",
+        "What did I write about the meeting today?",
+        "What did I write about the meeting last week?",
+        "Do I have any notes about Groceries?"
+      ]
+    },
+    {
+      "id": "SCEN_06",
+      "name": "Tag Filtering",
+      "goal": "Retrieve and summarise all notes associated with a specific tag.",
+      "initial_state": [
+        { "title": "Task 1", "body": "Finish API", "tags": ["urgent"] },
+        { "title": "Task 2", "body": "Email Boss", "tags": ["urgent"] },
+        { "title": "Task 3", "body": "Buy Coffee", "tags": ["low-priority"] }
+      ],
+      "turns": ["Summarise everything I've tagged as urgent."]
+    },
+    {
+      "id": "SCEN_07",
+      "name": "Partial Information",
+      "goal": "Update an existing note when the user provides minimal context.",
+      "initial_state": [{ "title": "Groceries", "body": "Milk, Bread", "tags": ["shopping"] }],
+      "turns": [
+        "Find my grocery list.",
+        "Add 'Eggs' to it.",
+        "I'm at the grocery store, what should I buy?"
+      ]
+    },
+    {
+      "id": "SCEN_08",
+      "name": "Date Context",
+      "goal": "Retrieve notes based on natural language date queries.",
+      "initial_state": [
+        {
+          "title": "Last Week Meeting",
+          "body": "API discussion",
+          "created_at": "2026-04-10 10:00:00"
+        },
+        {
+          "title": "Last Week Meeting",
+          "body": "API discussion",
+          "created_at": "2026-04-11 10:00:00"
+        }
+      ],
+      "turns": ["What did I write about the API on 10th of April?"]
+    },
+    {
+      "id": "SCEN_09",
+      "name": "Modification Confirmation",
+      "goal": "Significant body updates should trigger a confirmation check.",
+      "initial_state": [
+        {
+          "title": "Standup Notes",
+          "body": "Long detailed notes about blockers and progress.",
+          "tags": ["meetings"]
+        }
+      ],
+      "turns": [
+        "Update my standup note to just say 'All good'.",
+        "No, don't make the update.",
+        "Actually, update it to say 'needs work'"
+      ]
+    },
+    {
+      "id": "SCEN_10",
+      "name": "Vague Reference",
+      "goal": "Identify the correct note based on semantic context rather than title match.",
+      "initial_state": [
+        { "title": "Passwords", "body": "Don't forget the WiFi is 'Admin123'", "tags": ["home"] },
+        { "title": "Office", "body": "WiFi is 'Guest2026'", "tags": ["work"] }
+      ],
+      "turns": ["What is the WiFi password at home?"]
+    }
+  ]
+}

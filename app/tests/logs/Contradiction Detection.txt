@@ -1,0 +1,14 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> Do I have any notes that contradict each other?
+
+>> Yes — I found a clear contradiction:
+
+- **Door Code**: “The code is 1234”
+- **Security Update**: “The door code is now 5678”
+
+Those two notes conflict with each other. It looks like **Security Update** is the newer version, so **5678** may be the current code.
+
+If you want, I can also help you identify any other potentially conflicting notes or help you clean this up.

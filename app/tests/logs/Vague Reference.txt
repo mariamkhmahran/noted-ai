@@ -1,0 +1,7 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> What is the WiFi password at home?
+
+>> Your home WiFi password is **Admin123**.

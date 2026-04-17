@@ -1,0 +1,21 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> Delete the Project note.
+
+>> I found two matching notes:
+1. Project Alpha
+2. Project Beta
+
+Which one would you like me to delete?
+
+> I meant the Alpha project
+
+>> Got it — you mean **Project Alpha**. I can delete it, but I need your confirmation first.
+
+Reply with **“yes, delete Project Alpha”** and I’ll remove it.
+
+> I changed my mind, don't delete anything
+
+>> No problem — I won’t delete anything.

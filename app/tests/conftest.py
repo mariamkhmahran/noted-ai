@@ -36,7 +36,8 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 
     total = len(results_table)
     terminalreporter.write_line("-" * len(header))
-    terminalreporter.write_line(f"FINAL SCORE: {passed_count}/{total} ({(passed_count/total)*100:.1f}%)")
+    if total > 0:
+        terminalreporter.write_line(f"FINAL SCORE: {passed_count}/{total} ({(passed_count/total)*100:.1f}%)")
     
 @pytest.fixture(autouse=True)
 def reset_singleton():

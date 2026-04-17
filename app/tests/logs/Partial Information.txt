@@ -1,0 +1,38 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> Find my grocery list.
+
+>> I found one likely match:
+
+- Groceries — Milk, Bread
+
+If you want, I can help you update it or search for something more specific.
+
+> Add 'Eggs' to it.
+
+>> I found your grocery note, but I need your confirmation before updating it.
+
+Proposed update:
+- Title: Groceries
+- Body: Milk, Bread, Eggs
+- Tags: shopping
+
+Reply with **confirm** if you'd like me to save this change.I found your grocery note, but I need your confirmation before updating it.
+
+Proposed update:
+- Title: Groceries
+- Body: Milk, Bread, Eggs
+- Tags: shopping
+
+Reply with **confirm** if you'd like me to save this change.
+
+> I'm at the grocery store, what should I buy?
+
+>> Based on your grocery note, you should buy:
+
+- Milk
+- Bread
+
+If you want, I can also help you turn that into a fuller shopping list.

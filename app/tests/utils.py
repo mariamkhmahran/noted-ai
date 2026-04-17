@@ -15,7 +15,7 @@ def wait_for_agent_response(agent):
 def export_chat_history(chat_history, file_name):
     """ Parses agent chat history to create a user-friendly transcript. """
 
-    file_path = os.path.join("app/tests/transcripts", file_name)
+    file_path = os.path.join("app/tests/logs", file_name)
     with open(file_path, "w", encoding="utf-8") as f:
         for message in chat_history:
             role = message["role"] if "role" in message else None

@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 from datetime import datetime
 from app.db import NotedDB
-from .utils import wait_for_agent_response, export_chat_history
+from ..utils import wait_for_agent_response, export_chat_history
 
 @pytest.fixture
 def seeded_db(tmp_path):

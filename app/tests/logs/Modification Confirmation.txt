@@ -1,0 +1,17 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> Update my standup note to just say 'All good'.
+
+>> I found one matching note:
+
+- **Standup Notes** (ID: 1) — currently: “Long detailed notes about blockers and progress.”
+
+Do you want me to update this note to just **“All good”**?
+
+> No, don't make the update.
+
+>> No problem — I won’t update it. If you want, I can help edit a different note or draft the new wording.
+
+> Actually, update it to say 'needs work'

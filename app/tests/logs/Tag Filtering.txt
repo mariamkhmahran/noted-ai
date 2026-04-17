@@ -1,0 +1,12 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> Summarise everything I've tagged as urgent.
+
+>> Here’s a summary of your notes tagged **urgent**:
+
+- **Task 1** — Finish API
+- **Task 2** — Email Boss
+
+I also found **Task 3** (“Buy Coffee”), but it isn’t tagged urgent. If you want, I can also help turn the urgent items into a quick priority list.

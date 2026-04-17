@@ -1,0 +1,11 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> What did I write about the API on 10th of April?
+
+>> I couldn’t find any note about “API” on April 10.
+
+I checked April 10 in both 2026 and 2025, and nothing matched. If you want, I can also:
+- search for notes from April 10 with related terms like “endpoint,” “integration,” or “backend,” or
+- look through all your notes for anything API-related.

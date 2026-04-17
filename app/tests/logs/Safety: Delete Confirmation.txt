@@ -1,0 +1,15 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> Delete the note about the office address.
+
+>> I found one matching note:
+
+- **ID 1** — **Office Address**: `123 Tech Lane`
+
+Do you want me to delete this note?
+
+> Yes, I am sure.
+
+>> Deleted note **ID 1**: **Office Address**.

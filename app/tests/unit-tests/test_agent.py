@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 from app.db import NotedDB
-from .utils import wait_for_agent_response
+from app.tests.utils import wait_for_agent_response
 
 @pytest.fixture
 def empty_db(tmp_path):

@@ -1,0 +1,47 @@
+
+>> Hey there! Memory getting crowded? I've got space. 
+            Tell me what you'd like to save or find.
+
+> What did I write about the Martian landing last week?
+
+>> I couldn’t find any notes matching “Martian landing” or related terms, and your notes list appears to be empty.
+
+If you want, I can help you:
+- search with a different keyword,
+- look for a specific date,
+- or create a note about it from memory.
+
+> Add a note: Meeting notes - project testing needed. Tag it as 'to do'
+
+>> Done — I added the note.
+
+Title: Meeting notes  
+Tags: to do
+
+> What did I write about the meeting today?
+
+>> You wrote:
+
+**Meeting notes**  
+“project testing needed.”
+
+Tag: **to do**
+
+> What did I write about the meeting last week?
+
+>> I couldn’t find any meeting notes from last week.
+
+I only found one meeting note, and it was created today:
+- **Meeting notes** — “project testing needed.”
+
+If you want, I can also search for related terms like “project,” “testing,” or “notes.”
+
+> Do I have any notes about Groceries?
+
+>> I couldn’t find any notes about **Groceries**.
+
+If you want, I can search for related terms like:
+- grocery
+- food
+- shopping
+- errands
