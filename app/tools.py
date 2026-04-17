@@ -2,7 +2,17 @@ from datetime import datetime, time
 from .db import NotedDB
 
 def add_note(title, body, tags):
-    """ Add a new note to DB with a title, content, and category tags"""
+    """
+    Creates a new note in the database.
+    
+    Args:
+        title (str): The brief title of the note.
+        body (str): The main content of the note (Required).
+        tags (list[str]): A list of categories to label the note.
+        
+    Returns:
+        dict: with a status (ERROR | SUCCESS) and message.
+    """
 
     db = NotedDB()
     results = db.create(title, body, tags)
@@ -10,7 +20,15 @@ def add_note(title, body, tags):
     return results
 
 def validate_date_yyyy_mm_dd(date_str):
-    """Helper function to validate date limit inputs for the search function"""
+    """
+    Validates if a string matches the YYYY-MM-DD date format.
+    
+    Args:
+        date_str (str): The date string to validate.
+        
+    Returns:
+        bool: True if valid, False otherwise.
+    """
 
     try:
         datetime.strptime(date_str, "%Y-%m-%d")
@@ -18,8 +36,20 @@ def validate_date_yyyy_mm_dd(date_str):
     except:
         return False
 
-def search_notes(keyword=None, tags=[], limit=20, start_date=None, end_date=None):
-    """Search notes in database based on criteria"""
+def search_notes(keyword=None, tags=[], start_date=None, end_date=None, limit=20):
+    """
+    Searches for notes based on keywords, tags, and date ranges.
+    
+    Args:
+        keyword (str, optional): Search term for title or body.
+        tags (list[str], optional): Filter for notes containing these tags.
+        limit (int, optional): Max results to return (default 20).
+        start_date (str, optional): Start date in YYYY-MM-DD format.
+        end_date (str, optional): End date in YYYY-MM-DD format.
+        
+    Returns:
+        list[dict]: Matching notes or dict: Error status and message.
+    """
 
     sql_query = "SELECT * FROM Notes WHERE 1=0"
     where_clauses = []
@@ -84,18 +114,52 @@ def search_notes(keyword=None, tags=[], limit=20, start_date=None, end_date=None
     return results
 
 def delete_note(ids):
+    """
+    Permanently removes notes from the database by ID.
+    
+    Args:
+        ids (list[int]): A list of one or more Note IDs to delete.
+        
+    Returns:
+        list[str]: A status message for each ID processed.
+    """
+
     db = NotedDB()
     results = db.delete(ids)
 
     return results
 
 def update_note(note_id, title, body, tags):
+    """
+    Modifies an existing note's title, body, or tags.
+    
+    Args:
+        note_id (int): The unique ID of the note to update.
+        title (str): The new title.
+        body (str): The new content.
+        tags (list[str]): The new list of tags.
+        
+    Returns:
+        dict: with a status (ERROR | SUCCESS) and message.
+    """
+
     db = NotedDB()
     results = db.update(note_id, title, body, tags)
 
     return results
 
 def fetch_all(limit=None, order="ASC"):
+    """
+    Retrieves all notes from the database, sorted by creation date.
+    
+    Args:
+        limit (int, optional): Maximum number of notes to retrieve.
+        order (str, optional): Sort order, "ASC" or "DESC" (default "ASC").
+        
+    Returns:
+        list[dict]: List of all notes found or dict: Error status and message.
+    """
+
     query = f"""
     SELECT * 
     FROM Notes

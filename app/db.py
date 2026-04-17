@@ -43,11 +43,14 @@ class NotedDB():
             )
             self.connection.commit()
             
-            return "Note Created Successfully"
+            return {
+                "status": "SUCCESS",
+                "message": "Note Created Successfully"
+            }
         except Exception as e:
             return {
                 "status": "ERROR",
-                "content": f"Failed to create Note. {e}"
+                "message": f"Failed to create Note. {e}"
             }
 
     def search(self, sql_query, params=()):
@@ -77,7 +80,7 @@ class NotedDB():
         except Exception as e:
             return {
                 "status": "ERROR",
-                "content": e
+                "message": e
             }
         finally:
             self.connection.row_factory = None # reset to default valu
@@ -116,13 +119,16 @@ class NotedDB():
             rows_affected = self.cursor.rowcount
 
             if rows_affected > 0:
-                return "Note updated successfully"
+                return {
+                "status": "SUCCESS",
+                "message": "Note updated successfully"
+                }
             else:
                 raise Exception("Note not found")
         except Exception as e:
             return {
                 "status": "ERROR",
-                "content": f"Failed to update note. {e}"
+                "message": f"Failed to update note. {e}"
             }
         finally:
             self.connection.commit()

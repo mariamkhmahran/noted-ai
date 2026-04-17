@@ -27,12 +27,12 @@
           },
           "start_date": {
             "type": "string",
-            "description": "Optional start of date range, inclusive. Format: 'YYYY-MM-DD' or 'YYYY-MM-DD'.",
+            "description": "Optional start of date range, inclusive. Format: 'YYYY-MM-DD'.",
             "nullable": "True"
           },
           "end_date": {
             "type": "string",
-            "description": "Optional end of date range, inclusive. Format: 'YYYY-MM-DD' or 'YYYY-MM-DD'.",
+            "description": "Optional end of date range, inclusive. Format: 'YYYY-MM-DD'.",
             "nullable": "True"
           }
         },

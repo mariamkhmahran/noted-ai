@@ -74,7 +74,7 @@ The agent interacts with the persistence layer through tool calling. Each tool i
 | `delete_note`  | **Delete**     | Permanently removes a record by ID.                                                                       |
 | `fetch_all`    | **Read**       | Fetches the full list of notes (up to a limit). Helpful with reasoning tasks that require multiple notes. |
 
-> Full tools definitions in `app/tool_definitions.json`
+> Full tools schemas in [here](tool_schema.md).
 
 ### 3. Safety-First Tooling
 
