@@ -1,5 +1,4 @@
-from agent import NotedAgent
-from db import NotedDB
+from .agent import NotedAgent
 
 if __name__ == "__main__":
     agent = NotedAgent()

@@ -1,2 +1,5 @@
 dotenv
 openai
+pytest
+pytest-mock
+pytest-asyncio

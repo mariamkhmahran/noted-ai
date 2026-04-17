@@ -3,8 +3,8 @@ import sqlite3
 import json
 
 class NotedDB():
-    def __init__(self):
-        self.connection = sqlite3.connect("app/notes.db")
+    def __init__(self, db_path="app/notes.db"):
+        self.connection = sqlite3.connect(db_path)
         self.cursor = self.connection.cursor()
 
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS Notes (

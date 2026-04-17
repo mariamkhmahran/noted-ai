@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from openai import OpenAI
-from tools import add_note, search_notes, delete_note, update_note, fetch_all
+from .tools import add_note, search_notes, delete_note, update_note, fetch_all
 import json
 
 load_dotenv()

@@ -1,7 +1,7 @@
 import sqlite3
 import json
 from datetime import datetime, time
-from db import NotedDB
+from .db import NotedDB
 
 def add_note(title, body, tags):
     """ Add a new note to DB with a title, content, and category tags"""
