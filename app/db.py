@@ -44,8 +44,11 @@ class NotedDB():
             self.connection.commit()
             
             return "Note Created Successfully"
-        except:
-            return "Failed to create Note"
+        except Exception as e:
+            return {
+                "status": "ERROR",
+                "content": f"Failed to create Note. {e}"
+            }
 
     def search(self, sql_query, params=()):
         try:
@@ -70,10 +73,12 @@ class NotedDB():
                 for row in rows
             ]
 
-            
             return results
-        except ValueError as e:
-            return None
+        except Exception as e:
+            return {
+                "status": "ERROR",
+                "content": e
+            }
         finally:
             self.connection.row_factory = None # reset to default valu
             self.cursor = self.connection.cursor()
@@ -92,8 +97,8 @@ class NotedDB():
                         results += [f"Note {note_id} deleted successfully"]
                     else:
                         results += [f"Note {note_id} not found"]
-                except:
-                    results += [f"Faild to delete {note_id}"]
+                except Exception as e:
+                    results += [f"Faild to delete {note_id}, ERROR: {e}"]
             
             self.connection.commit()
 
@@ -112,8 +117,11 @@ class NotedDB():
                 return "Note updated successfully"
             else:
                 raise Exception("Note not found")
-        except:
-            return "Failed to update note"
+        except Exception as e:
+            return {
+                "status": "ERROR",
+                "content": f"Failed to update note. {e}"
+            }
         finally:
             self.connection.commit()
 

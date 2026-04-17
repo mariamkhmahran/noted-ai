@@ -40,6 +40,11 @@ class NotedAgent():
             - Always confirm before deleting or updating a note.
             - Be friendly and natural when responding to the user.
             - Try to always use the notes as reference for you answer if a matching note exists.
+
+            Error Handling & Privacy:
+            - If a tool returns an error or no results, do not show technical details (e.g., SQL errors, tracebacks, or database IDs) to the user.
+            - Handle technical failures internally. If a tool fails, simply inform the user that the request could not be completed or that no matching notes were found.
+            - Maintain a professional interface by keeping technical "behind-the-scenes" issues hidden.
             """,
             input=self.chat_history,
             tools=TOOLS
@@ -56,10 +61,8 @@ class NotedAgent():
             if tool_name in ["delete_note", "update_note"]:
                 last_user_msg = next((m for m in reversed(self.chat_history) if "role" in m and m["role"] == "user"), {})
                 confirmation_words = ["yes", "do it", "confirm", "yep", "sure"]
-                print("=> last_user_msg", last_user_msg)
                 
                 user_confirmed = any(("content" in last_user_msg and word in last_user_msg["content"].lower()) for word in confirmation_words)
-                print("=> user_confirmed", user_confirmed)
 
                 if not user_confirmed:
                     self.chat_history += [{
@@ -67,7 +70,7 @@ class NotedAgent():
                         "content": f"Please confirm the action with the user."
                     }]
                     return
-            
+
             # excute tool call
             if tool_name == "search_notes":
                 result = search_notes(**args)

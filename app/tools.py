@@ -15,7 +15,7 @@ def validate_date_yyyy_mm_dd(date_str):
     try:
         datetime.strptime(date_str, "%Y-%m-%d")
         return True
-    except ValueError:
+    except:
         return False
 
 def search_notes(keyword=None, tags=[], limit=20, start_date=None, end_date=None):
@@ -42,22 +42,32 @@ def search_notes(keyword=None, tags=[], limit=20, start_date=None, end_date=None
     # join the previous conditions with OR inside parentheses (in case a date limit was enforced)
     where_sql = "(" + (" OR ".join(where_clauses) if where_clauses else "1=1") + ")"
 
-    if start_date != None and validate_date_yyyy_mm_dd(start_date):
+    if start_date:
+        if not validate_date_yyyy_mm_dd(start_date):
+            return {
+                "status": "ERROR",
+                "content": "Invalid start date format. Please use YYYY-MM-DD"
+            }
+        
         date_limits.append("created_at >= ?")
-
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
         start_of_day = datetime.combine(start_datetime, time.min)
         params.append(start_of_day.strftime("%Y-%m-%d %H:%M:%S"))
-    if end_date != None and validate_date_yyyy_mm_dd(end_date):
-        date_limits.append("created_at <= ?")
 
+    if end_date:
+        if not validate_date_yyyy_mm_dd(end_date):
+            return  {
+                "status": "ERROR",
+                "content": "Invalid end date format. Please use YYYY-MM-DD"
+            }
+        
+        date_limits.append("created_at <= ?")
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
         end_of_day = datetime.combine(end_datetime, time.max)
         params.append(end_of_day.strftime("%Y-%m-%d %H:%M:%S"))
 
     if len(date_limits) > 0:
         where_sql += f" AND ({' AND '.join(date_limits)})"
-
 
     sql_query = f"""
         SELECT id, title, body, tags, created_at
