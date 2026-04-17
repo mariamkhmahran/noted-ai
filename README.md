@@ -39,6 +39,8 @@ cp .env.example .env
 echo "OPENAI_API_KEY=your_actual_key_here" > .env
 ```
 
+> _If you are running outside of the Docker container:_ you need to also install dependecies using `pip install -r requirements.txt`.
+
 #### 3. Launching the App
 
 Run the following command to build the environment and start the interactive CLI chat:
