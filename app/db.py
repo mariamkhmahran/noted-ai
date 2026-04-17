@@ -3,19 +3,37 @@ import sqlite3
 import json
 
 class NotedDB():
-    def __init__(self, db_path="app/notes.db"):
-        self.connection = sqlite3.connect(db_path)
-        self.cursor = self.connection.cursor()
+    _instance = None
 
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS Notes (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            body TEXT NOT NULL,
-            tags JSON,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );""")
-            
-        self.connection.commit()
+    def __init__(self, db_path="app/notes.db"):
+        pass
+
+    
+    def __new__(cls, db_path="app/notes.db"):
+        """
+        Singleton Pattern is used here to ensure that a single DB connection is used
+        throughout the application. This is to avoid the need to open then close the
+        connection after every tool call. The connection can be closed once when the
+        user exits. This also facilitates testing.
+        """
+
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+
+            # Initialize connection
+            cls._instance.connection = sqlite3.connect(db_path, check_same_thread=False)
+            cls._instance.cursor = cls._instance.connection.cursor()
+
+            # Create the table if not exist
+            cls._instance.cursor.execute("""CREATE TABLE IF NOT EXISTS Notes (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT,
+                body TEXT NOT NULL,
+                tags JSON,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );""")
+            cls._instance.connection.commit()
+        return cls._instance
 
     def create(self, title, body, tags):
         try:
@@ -29,7 +47,7 @@ class NotedDB():
         except:
             return "Failed to create Note"
 
-    def search(self, sql_query, params):
+    def search(self, sql_query, params=()):
         try:
             self.connection.row_factory = sqlite3.Row
             self.cursor = self.connection.cursor()

@@ -1,5 +1,3 @@
-import sqlite3
-import json
 from datetime import datetime, time
 from .db import NotedDB
 
@@ -8,7 +6,6 @@ def add_note(title, body, tags):
 
     db = NotedDB()
     results = db.create(title, body, tags)
-    db.close_connection()
 
     return results
 
@@ -73,21 +70,18 @@ def search_notes(keyword=None, tags=[], limit=20, start_date=None, end_date=None
 
     db = NotedDB()
     results = db.search(sql_query, params)
-    db.close_connection()
 
     return results
 
 def delete_note(ids):
     db = NotedDB()
     results = db.delete(ids)
-    db.close_connection()
 
     return results
 
 def update_note(note_id, title, body, tags):
     db = NotedDB()
     results = db.update(note_id, title, body, tags)
-    db.close_connection()
 
     return results
 
@@ -103,7 +97,6 @@ def fetch_all(limit=None, order="ASC"):
 
     db = NotedDB()
     results = db.search(query, (limit,))
-    db.close_connection()
 
     return results
 
