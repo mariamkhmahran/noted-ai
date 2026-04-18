@@ -4,6 +4,20 @@ A command-line (CLI) chat-based system that lets a user manage personal notes en
 
 ---
 
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#1-prerequisites)
+  - [Installation & Setup](#2-installation--setup)
+  - [Launching the App](#3-launching-the-app)
+- [System Architecture](#system-architecture)
+- [Evaluation Testing](#evaluation-testing)
+- [Project Structure](#project-structure)
+- [Behaviours Checklist](#required-behaviours-satisfied)
+
+---
+
 ## Tech Stack
 
 - **Core Logic:** Python 3.10+
@@ -76,7 +90,7 @@ The agent interacts with the persistence layer through tool calling. Each tool i
 | `delete_note`  | **Delete**     | Permanently removes a record by ID.                                                                       |
 | `fetch_all`    | **Read**       | Fetches the full list of notes (up to a limit). Helpful with reasoning tasks that require multiple notes. |
 
-> Full tools schemas in [here](tool_schema.md).
+> Full tools schemas can be found _[here](tool_schema.md)_.
 
 ### 3. Safety-First Tooling
 
