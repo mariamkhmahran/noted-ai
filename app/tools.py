@@ -117,21 +117,22 @@ def search_notes(keyword=None, tags=[], start_date=None, end_date=None, limit=20
     return results
 
 @tool
-def delete_note(ids):
+def delete_note(id: int, title: str):
     """
-    Permanently removes notes from the database by ID.
+    Permanently removes a note from the database by ID.
     
     Args:
-        ids (list[int]): A list of one or more Note IDs to delete.
+        ids (int): The note ID to delete.
+        title (str): The title of the note to delete.
         
     Returns:
-        list[str]: A status message for each ID processed.
+        str: A status message.
     """
 
     db = NotedDB()
-    results = db.delete(ids)
+    results = db.delete([id])
 
-    return results
+    return results[0]
 
 @tool
 def update_note(note_id, title, body, tags):

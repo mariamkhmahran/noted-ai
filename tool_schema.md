@@ -35,10 +35,11 @@ Each tool is implemented as a Python function that the LLM invokes via the OpenA
 
 #### 4. `delete_note` (equivilant to: `/DELETE`)
 
-- **Purpose:** Removes one or more notes from the database.
+- **Purpose:** Removes one notes from the database.
 - **Parameters:**
-  - `ids` (list of integers): A list of one or more note IDs to be deleted.
-- **Return Type:** `list[str]`: A status message for each ID processed.
+  - `id` (int): The note ID to delete.
+  - `title` (str): The title of the note to delete.
+- **Return Type:** `str`: A status message.
 
 #### 5. `fetch_all` (equivilant to: `/GET`)
 

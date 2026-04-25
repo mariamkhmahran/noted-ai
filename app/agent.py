@@ -68,7 +68,10 @@ class NotedAgent:
         if response.interrupts:
             interrupt = response.interrupts[0]
             action = interrupt.value["action_requests"][0]
-            print(f"\n>> About to {action['name']} with: {action['args']}")
+            action_name = "delete" if action['name'] == "delete_note" else "update"
+            note_title = f" \n**Note title:** {action['args']['title']}" if "title" in action['args'] else ""
+
+            print(f"\n>> Are you sure you want to {action_name} this note?{note_title}")
             user_decision = input(">> Confirm? (yes/no): ").strip().lower()
 
             if any(word in user_decision for word in CONFIRMATION_WORDS):
