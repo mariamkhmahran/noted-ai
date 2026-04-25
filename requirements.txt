@@ -3,3 +3,7 @@ openai
 pytest
 pytest-mock
 pytest-asyncio
+langchain>=0.2.0
+langchain-openai>=0.1.0
+langchain-core>=0.2.0
+langchain_classic

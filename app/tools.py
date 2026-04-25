@@ -1,6 +1,8 @@
 from datetime import datetime, time
+from langchain_core.tools import tool
 from .db import NotedDB
 
+@tool
 def add_note(title, body, tags):
     """
     Creates a new note in the database.
@@ -36,6 +38,7 @@ def validate_date_yyyy_mm_dd(date_str):
     except:
         return False
 
+@tool
 def search_notes(keyword=None, tags=[], start_date=None, end_date=None, limit=20):
     """
     Searches for notes based on keywords, tags, and date ranges.
@@ -113,6 +116,7 @@ def search_notes(keyword=None, tags=[], start_date=None, end_date=None, limit=20
 
     return results
 
+@tool
 def delete_note(ids):
     """
     Permanently removes notes from the database by ID.
@@ -129,6 +133,7 @@ def delete_note(ids):
 
     return results
 
+@tool
 def update_note(note_id, title, body, tags):
     """
     Modifies an existing note's title, body, or tags.
@@ -148,6 +153,7 @@ def update_note(note_id, title, body, tags):
 
     return results
 
+@tool
 def fetch_all(limit=None, order="ASC"):
     """
     Retrieves all notes from the database, sorted by creation date.
@@ -170,7 +176,7 @@ def fetch_all(limit=None, order="ASC"):
         query += " LIMIT ?"
 
     db = NotedDB()
-    results = db.search(query, (limit,))
+    results = db.search(query, (limit,) if limit else ())
 
     return results
 

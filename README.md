@@ -22,9 +22,10 @@ A command-line (CLI) chat-based system that lets a user manage personal notes en
 
 - **Core Logic:** Python 3.10+
 - **LLM Integration:** OpenAI [gpt-5.4-mini](https://developers.openai.com/api/docs/models/gpt-5.4-mini) (via tool-calling)
-- **Persistence:** SQLite.
-- **Testing:** Pytest.
-- **Containerization:** Docker, Docker-compose.
+- **Agent Framework:** [LangChain](https://python.langchain.com/) + [LangGraph](https://langchain-ai.github.io/langgraph/)
+- **Persistence:** SQLite
+- **Testing:** Pytest
+- **Containerization:** Docker, Docker Compose
 
 ---
 
@@ -53,7 +54,7 @@ cp .env.example .env
 echo "OPENAI_API_KEY=your_actual_key_here" > .env
 ```
 
-> _If you are running outside of the Docker container:_ you need to also install dependecies using `pip install -r requirements.txt`.
+> _If you are running outside of the Docker container:_ you need to also install dependencies using `pip install -r requirements.txt`.
 
 #### 3. Launching the App
 
@@ -71,16 +72,19 @@ docker compose run --rm app
 
 ### 1. The Autonomous Chat Loop (`agent.py`)
 
-The project is designed as a standalone, modular system. The `NotedAgent` class handles the entire conversational lifecycle:
+The project is designed as a standalone, modular system. The `NotedAgent` class handles the entire conversational lifecycle using LangChain's `create_agent`:
 
 - **Interface:** A clean console-based loop where the user provides natural language prompts.
-- **Orchestration:** The agent manages the `chat_history`, maintaining state across multiple turns.
-- **Tool Execution:** It autonomously determines when a tool is needed, executes the SQLite operation in the background, and integrates the result back into the conversation without exposing raw JSON/SQL to the user.
+- **Orchestration:** `create_agent` manages the full agentic loop from calling the model, to deciding when to invoke tools, executing them, feeding results back, and producing a final response. This replaces any manual tool-dispatching logic.
+- **Conversation State:** Chat history is persisted automatically across turns using LangGraph's `InMemorySaver` checkpointer, keyed by a `thread_id`. No manual history management is needed.
+- **Tool Execution:** The agent autonomously determines when a tool is needed, executes the SQLite operation in the background, and integrates the result back into the conversation without exposing raw JSON/SQL to the user.
 - **Graceful Exit:** Users can terminate the session at any time by typing `exit`.
 
 ### 2. Tooling & CRUD Mapping
 
-The agent interacts with the persistence layer through tool calling. Each tool is mapped to a specific **CRUD** (Create, Read, Update, Delete) operation:
+The agent interacts with the persistence layer through tool calling. Each tool is decorated with LangChain's `@tool` decorator, which automatically generates the tool schema from the function's signature and docstring.
+
+Each tool maps to a specific **CRUD** (Create, Read, Update, Delete) operation:
 
 | Tool Name      | CRUD Operation | Description                                                                                               |
 | :------------- | :------------- | :-------------------------------------------------------------------------------------------------------- |
@@ -90,15 +94,15 @@ The agent interacts with the persistence layer through tool calling. Each tool i
 | `delete_note`  | **Delete**     | Permanently removes a record by ID.                                                                       |
 | `fetch_all`    | **Read**       | Fetches the full list of notes (up to a limit). Helpful with reasoning tasks that require multiple notes. |
 
-> Full tools schemas can be found _[here](tool_schema.md)_.
+> Full tool schemas can be found _[here](tool_schema.md)_.
 
 ### 3. Safety-First Tooling
 
-Destructive tools like `delete_note` and `update_note` are wrapped in a **Confirmation Protocol**. The agent's system instructions strictly prohibit calling these tools until the user has provided a definitive "Yes" or "Confirm" in a follow-up turn.
+Destructive tools (`delete_note` and `update_note`) are protected by a **Confirmation Protocol** implemented via LangChain's `HumanInTheLoopMiddleware`. When the agent decides to call either of these tools, execution is automatically interrupted before the tool runs. The user is shown exactly what action is about to be taken and must explicitly approve or reject it. Only on approval does LangGraph resume execution and the tool call proceed.
 
 ### 4. Persistence Layer (`db.py`)
 
-I utilized **SQLite** for lightweight, serverless persistence.
+SQLite is used for lightweight, serverless persistence.
 
 #### **The Singleton Pattern**
 
@@ -118,7 +122,7 @@ The database includes a single `Notes` table:
 
 ## Evaluation Testing
 
-This project uses a three-tier testing strategy managed via pytest: unit tests, state progression assertion tests, scenario testing with LLM as judge.
+This project uses a three-tier testing strategy managed via pytest: unit tests, state progression assertion tests, and scenario testing with LLM-as-a-Judge.
 
 To run all tests:
 
@@ -139,7 +143,7 @@ These are integration tests that evaluate the agent's performance across multi-t
 
 - **Methodology**: The test simulates a sequence of user prompts (e.g., adding a note, then updating it, then deleting another).
 - **Goal**: To verify that regardless of the agent's "word choice," the correct **tools** were called and the **SQLite database** reflects the expected final state.
-- **Audit**: Full transcripts are saved to `/logs/` for manual review
+- **Audit**: Full transcripts are saved to `/logs/` for manual review.
 
 ### 3. LLM-as-a-Judge Evaluation (`test_scenario_llm_judge.py`)
 
@@ -160,9 +164,9 @@ Because AI behavior is stochastic, there will always a certain degree of randomn
 ## Project Structure
 
 - `app/main.py`: Main entry point to the app.
-- `app/agent.py`: Chat logic and system prompt configuration.
+- `app/agent.py`: Chat logic, LangChain agent configuration, and system prompt.
 - `app/db.py`: SQLite persistence layer.
-- `app/tools.py`: Tool definitions for the LLM.
+- `app/tools.py`: Tool definitions decorated with LangChain's `@tool`.
 - `tests/*`: Tests.
 - `tests/logs/`: Auto-generated transcripts of every test run for audit purposes.
 
@@ -172,7 +176,7 @@ Because AI behavior is stochastic, there will always a certain degree of randomn
 
 - [x] **Add/Search/Update/Delete Notes:** Full CRUD capabilities via tool calls.
 - [x] **Intent Disambiguation:** Asks for clarification when queries return multiple results.
-- [x] **Safety:** Mandatory confirmation on all destructive actions.
-- [x] **Reasoning:** Capable of comparing notes and performing complex tasks (e.g., summerizing, identifying contradictions)
+- [x] **Safety:** Mandatory confirmation on all destructive actions, enforced via `HumanInTheLoopMiddleware`.
+- [x] **Reasoning:** Capable of comparing notes and performing complex tasks (e.g., summarising, identifying contradictions).
 - [x] **Persistence:** All notes survive across restarts via local SQLite3 database.
-- [x] **Multi-turn awareness:** By mainting the full chat history, the agent can handle follow up questions.
+- [x] **Multi-turn awareness:** Conversation history is maintained automatically via LangGraph's checkpointer across all turns.
