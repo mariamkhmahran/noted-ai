@@ -23,7 +23,8 @@ A command-line (CLI) chat-based system that lets a user manage personal notes en
 - **Core Logic:** Python 3.10+
 - **LLM Integration:** OpenAI [gpt-5.4-mini](https://developers.openai.com/api/docs/models/gpt-5.4-mini) (via tool-calling)
 - **Agent Framework:** [LangChain](https://python.langchain.com/) + [LangGraph](https://langchain-ai.github.io/langgraph/)
-- **Persistence:** SQLite
+- **Persistence:** SQLite (structured note storage) + [ChromaDB](https://www.trychroma.com/) (vector store for semantic search)
+- **Embeddings:** OpenAI `text-embedding-3-small` (via `langchain-openai`)
 - **Testing:** Pytest
 - **Containerization:** Docker, Docker Compose
 
@@ -36,7 +37,7 @@ Follow these steps to set up and run the **NotedAI** app on your local machine.
 #### 1. Prerequisites
 
 - **Docker & Docker Compose**: Ensure Docker is installed and the Docker Daemon is running.
-- **OpenAI API Key**: You will need a valid key to power the agent's reasoning.
+- **OpenAI API Key**: You will need a valid key to power both the agent's reasoning and the embedding model.
 
 #### 2. Installation & Setup
 
@@ -89,9 +90,9 @@ Each tool maps to a specific **CRUD** (Create, Read, Update, Delete) operation:
 | Tool Name      | CRUD Operation | Description                                                                                               |
 | :------------- | :------------- | :-------------------------------------------------------------------------------------------------------- |
 | `add_note`     | **Create**     | Generates a new entry with a title, body, and tags.                                                       |
-| `search_notes` | **Read**       | Queries the database using keywords or tags to find existing info.                                        |
+| `search_notes` | **Read**       | Queries the vector store semantically, then fetches full records from SQLite by ID.                       |
 | `update_note`  | **Update**     | Modifies the content or metadata of an existing note by ID.                                               |
-| `delete_note`  | **Delete**     | Permanently removes a record by ID.                                                                       |
+| `delete_note`  | **Delete**     | Permanently removes a record by ID from both SQLite and ChromaDB.                                         |
 | `fetch_all`    | **Read**       | Fetches the full list of notes (up to a limit). Helpful with reasoning tasks that require multiple notes. |
 
 > Full tool schemas can be found _[here](tool_schema.md)_.
@@ -102,21 +103,37 @@ Destructive tools (`delete_note` and `update_note`) are protected by a **Confirm
 
 ### 4. Persistence Layer (`db.py`)
 
-SQLite is used for lightweight, serverless persistence.
+The persistence layer uses two complementary stores that are always kept in sync:
+
+- **SQLite** is the source of truth for all structured note data (title, body, tags, timestamps).
+- **ChromaDB** is the vector index, storing OpenAI embeddings keyed by SQLite note ID, and powering all semantic search operations.
+
+```
+Write path:  agent → SQLite (insert) → ChromaDB (embed + index)
+Search path: agent → ChromaDB (semantic search) → SQLite (fetch by ID)
+```
+
+Every write operation (create, update, delete) updates both stores atomically. If the ChromaDB write fails after a successful SQLite insert, the SQLite record is rolled back to prevent the stores from going out of sync.
 
 #### **The Singleton Pattern**
 
-The `NotedDB` class implements a **Singleton Pattern**. This ensures that throughout the entire lifecycle of the application only one database connection instance exists. This is to avoid the need to open then close the connection after every tool call. The connection can be closed once when the user exits. This also prevents data inconsistency and file-lock issues during concurrent test runs.
+The `NotedDB` class implements a **Singleton Pattern**. This ensures that throughout the entire lifecycle of the application only one database connection instance exists, and that a single ChromaDB client is shared across all tool calls. This avoids the need to open and close connections after every tool call, and prevents data inconsistency and file-lock issues during concurrent test runs.
 
 #### **Schema Design**
 
-The database includes a single `Notes` table:
+The SQLite database includes a single `Notes` table:
 
-- **`id` (INTEGER):** Primary key for unique identification and reliable updates.
+- **`id` (INTEGER):** Primary key for unique identification and reliable updates. Also used as the ChromaDB document ID to keep both stores in sync.
 - **`title` (TEXT):** Indexed for fast keyword searching.
 - **`body` (TEXT):** Stores the core content of the note.
 - **`tags` (JSON/TEXT):** Stored as a JSON string, allowing the agent to filter notes by multiple categories dynamically.
-- **`created_at` (TIMESTAMP):** Automatically tracked to allow the agent to reason about "recent" or "old" notes.
+- **`created_at` (TIMESTAMP):** Automatically tracked to allow the agent to reason about "recent" or "old" notes, and to support date-range filtering on search results.
+
+#### **Semantic Search with ChromaDB**
+
+When a note is created or updated, its `title`, `body`, and `tags` are concatenated into a single text string and embedded using OpenAI's `text-embedding-3-small` model via `langchain-openai`. The resulting vector is stored in ChromaDB alongside the SQLite `note_id` as metadata.
+
+At search time, the user's natural language query is embedded using the same model and compared against all stored vectors using cosine similarity. ChromaDB returns the most semantically relevant note IDs, which are then used to fetch the full note records from SQLite.
 
 ---
 
@@ -165,7 +182,7 @@ Because AI behavior is stochastic, there will always a certain degree of randomn
 
 - `app/main.py`: Main entry point to the app.
 - `app/agent.py`: Chat logic, LangChain agent configuration, and system prompt.
-- `app/db.py`: SQLite persistence layer.
+- `app/db.py`: SQLite and ChromaDB persistence layer, including embedding logic.
 - `app/tools.py`: Tool definitions decorated with LangChain's `@tool`.
 - `tests/*`: Tests.
 - `tests/logs/`: Auto-generated transcripts of every test run for audit purposes.
@@ -178,5 +195,6 @@ Because AI behavior is stochastic, there will always a certain degree of randomn
 - [x] **Intent Disambiguation:** Asks for clarification when queries return multiple results.
 - [x] **Safety:** Mandatory confirmation on all destructive actions, enforced via `HumanInTheLoopMiddleware`.
 - [x] **Reasoning:** Capable of comparing notes and performing complex tasks (e.g., summarising, identifying contradictions).
-- [x] **Persistence:** All notes survive across restarts via local SQLite3 database.
+- [x] **Persistence:** All notes survive across restarts via local SQLite3 database and a persisted ChromaDB vector store.
 - [x] **Multi-turn awareness:** Conversation history is maintained automatically via LangGraph's checkpointer across all turns.
+- [x] **Semantic Search:** Notes are embedded at write time using OpenAI embeddings and indexed in ChromaDB. Search retrieves results by meaning, not just keyword match.
