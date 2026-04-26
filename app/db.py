@@ -1,6 +1,6 @@
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
-from typing import List
+from langchain_core.documents import Document
 import sqlite3
 import json
 
@@ -139,26 +139,27 @@ class NotedDB():
             self.cursor = self.connection.cursor()
         
     def delete(self, note_id: str):
-            try:
-                self.cursor.execute(
-                    "DELETE FROM Notes WHERE ID=?",
-                    (note_id,)
-                )
-                rows_affected = self.cursor.rowcount
-                
-                if rows_affected > 0:
-                    result = f"Note {note_id} deleted successfully"
-                else:
-                    result = f"Note {note_id} not found"
+        try:
+            self.cursor.execute(
+                "DELETE FROM Notes WHERE ID=?",
+                (note_id,)
+            )
+            rows_affected = self.cursor.rowcount
 
+            if rows_affected > 0:
                 self.connection.commit()
+                self.vector_store.delete(ids=[str(note_id)])
+                result = f"Note {note_id} deleted successfully"
+            else:
+                self.connection.commit()
+                result = f"Note {note_id} not found"
 
-            except Exception as e:
-                print(e)
-                result = f"Faild to delete {note_id}, ERROR: {e}"
-            
-            print(result)
-            return result
+        except Exception as e:
+            print(e)
+            result = f"Failed to delete {note_id}, ERROR: {e}"
+
+        print(result)
+        return result
 
     def update(self, note_id, title, body, tags):
         try:
@@ -172,12 +173,22 @@ class NotedDB():
             rows_affected = self.cursor.rowcount
 
             if rows_affected > 0:
+                self.connection.commit()
+                self.vector_store.update_document(
+                    document_id=str(note_id),
+                    document=Document(
+                        page_content=f"{title} - {body} - {' '.join(tags)}", 
+                        metadata={"note_id": note_id}
+                        ),
+                )
+                
                 return {
-                "status": "SUCCESS",
-                "message": "Note updated successfully"
+                    "status": "SUCCESS",
+                    "message": "Note updated successfully"
                 }
             else:
                 raise Exception("Note not found")
+
         except Exception as e:
             return {
                 "status": "ERROR",
@@ -185,6 +196,6 @@ class NotedDB():
             }
         finally:
             self.connection.commit()
-
+            
     def close_connection(self):
         return self.connection.close()
