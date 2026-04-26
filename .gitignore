@@ -2,3 +2,4 @@
 .env
 notes.db
 .DS_Store
+*chroma_db/

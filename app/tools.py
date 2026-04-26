@@ -39,14 +39,13 @@ def validate_date_yyyy_mm_dd(date_str):
         return False
 
 @tool
-def search_notes(keyword=None, tags=[], start_date=None, end_date=None, limit=20):
+def search_notes(query, start_date=None, end_date=None):
     """
     Searches for notes based on keywords, tags, and date ranges.
     
     Args:
-        keyword (str, optional): Search term for title or body.
+        query (str): Search term for title, body, or tags.
         tags (list[str], optional): Filter for notes containing these tags.
-        limit (int, optional): Max results to return (default 20).
         start_date (str, optional): Start date in YYYY-MM-DD format.
         end_date (str, optional): End date in YYYY-MM-DD format.
         
@@ -54,27 +53,8 @@ def search_notes(keyword=None, tags=[], start_date=None, end_date=None, limit=20
         list[dict]: Matching notes or dict: Error status and message.
     """
 
-    sql_query = "SELECT * FROM Notes WHERE 1=0"
-    where_clauses = []
-    params = []
-    date_limits = []
-
-    if keyword != None:
-        where_clauses.append("(title LIKE ? OR body LIKE ?)")
-        params += [f"%{keyword}%"] * 2
-
-    for tag in tags:
-        where_clauses.append("""
-            EXISTS (
-                SELECT 1 FROM json_each(Notes.tags)
-                WHERE json_each.value = ?
-            )
-        """)
-        params.append(f"%{tag}%")
-
-    # join the previous conditions with OR inside parentheses (in case a date limit was enforced)
-    where_sql = "(" + (" OR ".join(where_clauses) if where_clauses else "1=1") + ")"
-
+    formatted_start_date = None
+    formatted_end_date = None
     if start_date:
         if not validate_date_yyyy_mm_dd(start_date):
             return {
@@ -82,11 +62,10 @@ def search_notes(keyword=None, tags=[], start_date=None, end_date=None, limit=20
                 "content": "Invalid start date format. Please use YYYY-MM-DD"
             }
         
-        date_limits.append("created_at >= ?")
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
         start_of_day = datetime.combine(start_datetime, time.min)
-        params.append(start_of_day.strftime("%Y-%m-%d %H:%M:%S"))
-
+        formatted_start_date = start_of_day
+    
     if end_date:
         if not validate_date_yyyy_mm_dd(end_date):
             return  {
@@ -94,25 +73,12 @@ def search_notes(keyword=None, tags=[], start_date=None, end_date=None, limit=20
                 "content": "Invalid end date format. Please use YYYY-MM-DD"
             }
         
-        date_limits.append("created_at <= ?")
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
         end_of_day = datetime.combine(end_datetime, time.max)
-        params.append(end_of_day.strftime("%Y-%m-%d %H:%M:%S"))
-
-    if len(date_limits) > 0:
-        where_sql += f" AND ({' AND '.join(date_limits)})"
-
-    sql_query = f"""
-        SELECT id, title, body, tags, created_at
-        FROM Notes
-        WHERE {where_sql}
-        ORDER BY created_at DESC
-        LIMIT ?
-    """
-    params.append(limit)
+        formatted_end_date = end_of_day
 
     db = NotedDB()
-    results = db.search(sql_query, params)
+    results = db.search(query, start_date=formatted_start_date, end_date=formatted_end_date)
 
     return results
 
@@ -130,7 +96,7 @@ def delete_note(id: int, title: str):
     """
 
     db = NotedDB()
-    results = db.delete([id])
+    results = db.delete(id)
 
     return results[0]
 
@@ -155,29 +121,19 @@ def update_note(note_id, title, body, tags):
     return results
 
 @tool
-def fetch_all(limit=None, order="ASC"):
+def fetch_all(order="ASC"):
     """
     Retrieves all notes from the database, sorted by creation date.
     
     Args:
-        limit (int, optional): Maximum number of notes to retrieve.
         order (str, optional): Sort order, "ASC" or "DESC" (default "ASC").
         
     Returns:
         list[dict]: List of all notes found or dict: Error status and message.
     """
 
-    query = f"""
-    SELECT * 
-    FROM Notes
-    ORDER BY created_at {order}
-    """
-
-    if limit:
-        query += " LIMIT ?"
-
     db = NotedDB()
-    results = db.search(query, (limit,) if limit else ())
+    results = db.search(order=order)
 
     return results
 
