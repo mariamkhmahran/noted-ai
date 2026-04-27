@@ -3,3 +3,7 @@ openai
 pytest
 pytest-mock
 pytest-asyncio
+langchain
+langchain-openai
+langchain-core
+langchain_chroma

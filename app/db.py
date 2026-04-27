@@ -1,4 +1,6 @@
-from typing import List
+from langchain_chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
+from langchain_core.documents import Document
 import sqlite3
 import json
 
@@ -33,6 +35,13 @@ class NotedDB():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );""")
             cls._instance.connection.commit()
+
+            cls._instance.vector_store = Chroma(
+                collection_name="notes",
+                embedding_function=OpenAIEmbeddings(model="text-embedding-3-small"),
+                persist_directory="./app/chroma_db"
+            )
+
         return cls._instance
 
     def create(self, title, body, tags):
@@ -42,6 +51,19 @@ class NotedDB():
                 (title, body, json.dumps(tags))
             )
             self.connection.commit()
+            note_id = self.cursor.lastrowid
+
+            try:
+                self.vector_store.add_texts(
+                    texts=[f"{title} - {body} - {' '.join(tags)}"],
+                    metadatas=[{"note_id": note_id}],
+                    ids=[str(note_id)]
+                )
+            except Exception as e:
+                # Rollback SQLite insert to keep stores in sync
+                self.cursor.execute("DELETE FROM Notes WHERE ID = ?", (note_id,))
+                self.connection.commit()
+                raise e
             
             return {
                 "status": "SUCCESS",
@@ -53,15 +75,45 @@ class NotedDB():
                 "message": f"Failed to create Note. {e}"
             }
 
-    def search(self, sql_query, params=()):
+    def search(
+            self, 
+            query: str = None, 
+            top_k: int = 4, 
+            start_date: str = None, 
+            end_date: str = None,
+            order: str = "ASC"
+        ):
+
         try:
             self.connection.row_factory = sqlite3.Row
             self.cursor = self.connection.cursor()
 
-            self.cursor.execute(
-                sql_query,
-                params
-            )
+            if query:
+                # Semantic search via Chroma
+                results = self.vector_store.similarity_search(query, k=top_k)
+                note_ids = [int(r.metadata["note_id"]) for r in results]
+
+                if not note_ids:
+                    return []
+
+                placeholders = ",".join("?" * len(note_ids))
+                sql = f"SELECT * FROM Notes WHERE ID IN ({placeholders})"
+                params = list(note_ids)
+            else:
+                # Fetch all
+                sql = "SELECT * FROM Notes WHERE 1=1"
+                params = []
+
+            if start_date:
+                sql += " AND created_at >= ?"
+                params.append(start_date)
+            if end_date:
+                sql += " AND created_at <= ?"
+                params.append(end_date)
+
+            sql += f" ORDER BY created_at {order}"
+
+            self.cursor.execute(sql, params)
             rows = self.cursor.fetchall()
             self.connection.commit()
 
@@ -86,26 +138,28 @@ class NotedDB():
             self.connection.row_factory = None # reset to default valu
             self.cursor = self.connection.cursor()
         
-    def delete(self, ids: List[str]):
-            results = []
-            for note_id in ids:
-                try:
-                    self.cursor.execute(
-                        "DELETE FROM Notes WHERE ID=?",
-                        (note_id,)
-                    )
-                    rows_affected = self.cursor.rowcount
-                    
-                    if rows_affected > 0:
-                        results += [f"Note {note_id} deleted successfully"]
-                    else:
-                        results += [f"Note {note_id} not found"]
-                except Exception as e:
-                    results += [f"Faild to delete {note_id}, ERROR: {e}"]
-            
-            self.connection.commit()
+    def delete(self, note_id: str):
+        try:
+            self.cursor.execute(
+                "DELETE FROM Notes WHERE ID=?",
+                (note_id,)
+            )
+            rows_affected = self.cursor.rowcount
 
-            return results
+            if rows_affected > 0:
+                self.connection.commit()
+                self.vector_store.delete(ids=[str(note_id)])
+                result = f"Note {note_id} deleted successfully"
+            else:
+                self.connection.commit()
+                result = f"Note {note_id} not found"
+
+        except Exception as e:
+            print(e)
+            result = f"Failed to delete {note_id}, ERROR: {e}"
+
+        print(result)
+        return result
 
     def update(self, note_id, title, body, tags):
         try:
@@ -119,12 +173,22 @@ class NotedDB():
             rows_affected = self.cursor.rowcount
 
             if rows_affected > 0:
+                self.connection.commit()
+                self.vector_store.update_document(
+                    document_id=str(note_id),
+                    document=Document(
+                        page_content=f"{title} - {body} - {' '.join(tags)}", 
+                        metadata={"note_id": note_id}
+                        ),
+                )
+                
                 return {
-                "status": "SUCCESS",
-                "message": "Note updated successfully"
+                    "status": "SUCCESS",
+                    "message": "Note updated successfully"
                 }
             else:
                 raise Exception("Note not found")
+
         except Exception as e:
             return {
                 "status": "ERROR",
@@ -132,6 +196,6 @@ class NotedDB():
             }
         finally:
             self.connection.commit()
-
+            
     def close_connection(self):
         return self.connection.close()
